@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('augeApp', [])
+angular.module('augeApp', ['firebase'])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {
