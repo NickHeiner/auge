@@ -1,13 +1,27 @@
 'use strict';
 
 angular.module('augeApp')
-    .directive('render', function() {
+    .factory('degreesToRadians', function() {
+        return function(degrees) {
+            return degrees * Math.PI / 180;
+        };
+    })
+    .factory('sensorHasRequiredKeys', function() {
+        var requiredKeys = ['alpha', 'beta', 'gamma'];
+
+        return function(sensor) {
+            return _.all(requiredKeys, function(key) {
+                return angular.isDefined(sensor[key]);
+            });
+        };
+    })
+    .directive('render', function(sensorHasRequiredKeys, degreesToRadians) {
         return {
             templateUrl: 'views/render.html',
             scope: {
                 sensorData: '='
             },
-            link: function($scope, $element, $attr) {
+            link: function($scope, $element) {
                 var canvas = $element.find('canvas')[0];
                 var engine = new window.BABYLON.Engine(canvas, true);
 
@@ -17,7 +31,7 @@ angular.module('augeApp')
                 new BABYLON.ArcRotateCamera("Camera", 1, 0.8, 10, new BABYLON.Vector3(0, 0, 0), scene);
                 new BABYLON.PointLight("Omni", new BABYLON.Vector3(0, 0, 10), scene);
 
-                var box = BABYLON.Mesh.CreateTorus("Box", 5, 1, 10, scene, true);
+                var box = BABYLON.Mesh.CreateBox("Box", 5, scene, true);
 
                 // Attach the camera to the scene
                 scene.activeCamera.attachControl(canvas);
@@ -28,18 +42,19 @@ angular.module('augeApp')
                 });
 
                 $scope.$watch('sensorData', function(sensor) {
-                    var requiredKeys = ['alpha', 'beta', 'gamma'];
 
-                    if (_.any(requiredKeys, function(key) {
-                        return angular.isUndefined(sensor[key]);
-                    })) {
+                    if (!sensorHasRequiredKeys(sensor)) {
                         return;
                     }
 
-                    box.rotation.x = sensor.alpha;
-                    box.rotation.y = sensor.beta;
-                    box.rotation.z = sensor.gamma;
+                    box.rotation.y = degreesToRadians(sensor.alpha);
+                    box.rotation.x = degreesToRadians(sensor.beta);
+                    box.rotation.z = degreesToRadians(sensor.gamma);
                 });
+
+                $scope.shouldShowCanvas = function() {
+                    return sensorHasRequiredKeys($scope.sensorData);
+                }
 
             }
         };
