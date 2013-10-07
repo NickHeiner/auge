@@ -1,3 +1,5 @@
+'use strict';
+
 angular.module('augeApp')
     .directive('sensor', function() {
        return {

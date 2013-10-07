@@ -8,6 +8,7 @@ angular.module('augeApp')
             $scope.$apply(function() {
 
                 // for some reason _.merge or _.assign won't work here, and I don't know why.
+                // Is there some property that those methods override that break this?
                 ['alpha', 'beta', 'gamma'].forEach(function(prop) {
                    $scope.sensor[prop] = eventData[prop];
                 });
