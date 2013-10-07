@@ -13,10 +13,11 @@ angular.module('augeApp')
 
                 var scene = new BABYLON.Scene(engine);
 
-                // Creating a camera looking to the zero point (0,0,0), a light, and a sphere of size 1
-                var camera = new BABYLON.ArcRotateCamera("Camera", 1, 0.8, 10, new BABYLON.Vector3(0, 0, 0), scene);
-                var light0 = new BABYLON.PointLight("Omni", new BABYLON.Vector3(0, 0, 10), scene);
-                var origin = BABYLON.Mesh.CreateSphere("origin", 10, 1.0, scene);
+                // Creating a camera looking to the zero point (0,0,0) and a light
+                new BABYLON.ArcRotateCamera("Camera", 1, 0.8, 10, new BABYLON.Vector3(0, 0, 0), scene);
+                new BABYLON.PointLight("Omni", new BABYLON.Vector3(0, 0, 10), scene);
+
+                var box = BABYLON.Mesh.CreateTorus("Box", 5, 1, 10, scene, true);
 
                 // Attach the camera to the scene
                 scene.activeCamera.attachControl(canvas);
@@ -24,6 +25,20 @@ angular.module('augeApp')
                 // Once the scene is loaded, just register a render loop to render it
                 engine.runRenderLoop(function() {
                     scene.render();
+                });
+
+                $scope.$watch('sensorData', function(sensor) {
+                    var requiredKeys = ['alpha', 'beta', 'gamma'];
+
+                    if (_.any(requiredKeys, function(key) {
+                        return angular.isUndefined(sensor[key]);
+                    })) {
+                        return;
+                    }
+
+                    box.rotation.x = sensor.alpha;
+                    box.rotation.y = sensor.beta;
+                    box.rotation.z = sensor.gamma;
                 });
 
             }
